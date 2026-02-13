@@ -66,11 +66,13 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             min-width: 120px; /* Ensures touch-friendly size */
             min-height: 60px; /* Touch target size */
+            flex-shrink: 0; /* Prevents shrinking */
         }
         #yes-btn {
             background: linear-gradient(45deg, #ff69b4, #ffb3ba);
             color: white;
             transform: scale(1);
+            transform-origin: center; /* Ensures scaling from center */
         }
         #no-btn {
             background: linear-gradient(45deg, #ffb3ba, #ffe6f2);
@@ -142,9 +144,12 @@
         const noBtn = document.getElementById('no-btn');
         const teddyGif = document.getElementById('teddy-gif');
         let scale = 1;
+        const maxScale = 3; // Cap the scale to prevent overwhelming the layout
 
         noBtn.addEventListener('click', () => {
-            scale += 0.2;
+            if (scale < maxScale) {
+                scale += 0.2;
+            }
             yesBtn.style.transform = `scale(${scale})`;
             // Show a pleading teddy GIF on No
             teddyGif.src = "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z9z/giphy.gif"; // Replace with a pleading teddy GIF
