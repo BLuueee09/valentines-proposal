@@ -16,7 +16,6 @@
             min-height: 100vh;
             margin: 0;
             color: #d63384;
-            overflow: hidden;
             position: relative;
             padding: 20px;
         }
@@ -37,32 +36,13 @@
             0% { transform: translateY(100vh); }
             100% { transform: translateY(-100vh); }
         }
-        h1 {
-            font-size: 3em;
-            margin-bottom: 30px;
+        .content {
+            max-width: 90vw;
             text-align: center;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-            animation: pulse 2s infinite;
-            transition: all 0.5s ease;
         }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        .buttons {
-            display: flex;
-            gap: 30px;
-            margin-bottom: 30px;
-            flex-direction: row; /* Default horizontal */
-            flex-wrap: wrap;
-            justify-content: center;
-            transition: all 0.5s ease;
-        }
-        .buttons.vertical {
-            flex-direction: column; /* Switch to vertical when Yes is too big */
-            gap: 20px;
-        }
-        button {
+        #yes-btn {
+            background: linear-gradient(45deg, #ff69b4, #ffb3ba);
+            color: white;
             padding: 20px 40px;
             font-size: 1.5em;
             font-family: inherit;
@@ -73,19 +53,44 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             min-width: 120px;
             min-height: 60px;
-            flex-shrink: 0;
+            float: left; /* Float left for wrapping */
+            margin-right: 20px;
+            margin-bottom: 20px;
         }
-        #yes-btn {
-            background: linear-gradient(45deg, #ff69b4, #ffb3ba);
-            color: white;
-            transform: scale(1);
-            transform-origin: center;
+        #yes-btn:hover, #yes-btn:active {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        h1 {
+            font-size: 3em;
+            margin-bottom: 30px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            animation: pulse 2s infinite;
+            transition: all 0.5s ease;
+            clear: none; /* Allow wrapping around floated button */
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
         #no-btn {
             background: linear-gradient(45deg, #ffb3ba, #ffe6f2);
             color: #d63384;
+            padding: 20px 40px;
+            font-size: 1.5em;
+            font-family: inherit;
+            border: 2px solid #ff69b4;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            min-width: 120px;
+            min-height: 60px;
+            clear: left; /* Clear float on No button to prevent overlap */
+            margin-bottom: 30px;
         }
-        button:hover, button:active {
+        #no-btn:hover, #no-btn:active {
             transform: scale(1.1);
             box-shadow: 0 6px 12px rgba(0,0,0,0.3);
         }
@@ -99,6 +104,7 @@
             border-radius: 20px;
             overflow: hidden;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            clear: both; /* Clear floats for GIF */
         }
         img {
             max-width: 100%;
@@ -113,37 +119,37 @@
             h1 {
                 font-size: 2.5em;
             }
-            button {
+            #yes-btn, #no-btn {
                 font-size: 1.2em;
                 padding: 15px 30px;
-            }
-            .buttons {
-                gap: 20px;
             }
         }
         @media (max-width: 480px) {
             h1 {
                 font-size: 2em;
             }
-            button {
+            #yes-btn, #no-btn {
                 font-size: 1em;
                 padding: 12px 25px;
+                float: none; /* Disable float on mobile for stacking */
+                clear: none;
+                display: block;
+                margin: 10px auto;
             }
-            .gif-container {
-                width: min(300px, 90vw);
-                height: min(300px, 90vw);
+            .content {
+                text-align: left; /* Adjust for no float */
             }
         }
     </style>
 </head>
 <body>
-    <h1 id="prompt">Will you be my Valentine's? 💕</h1>
-    <div class="buttons" id="buttons-container">
+    <div class="content">
         <button id="yes-btn">Yes! 😍</button>
+        <h1 id="prompt">Will you be my Valentine's? 💕</h1>
         <button id="no-btn">No 😢</button>
-    </div>
-    <div class="gif-container">
-        <img id="teddy-gif" src="" alt="Cute Teddy Bear" class="hidden">
+        <div class="gif-container">
+            <img id="teddy-gif" src="" alt="Cute Teddy Bear" class="hidden">
+        </div>
     </div>
 
     <script>
@@ -151,9 +157,9 @@
         const noBtn = document.getElementById('no-btn');
         const teddyGif = document.getElementById('teddy-gif');
         const promptEl = document.getElementById('prompt');
-        const buttonsContainer = document.getElementById('buttons-container');
-        let scale = 1;
         let promptIndex = 0;
+        let width = 120; // Initial width
+        let height = 60; // Initial height
 
         // Array of prompts for "No" clicks
         const prompts = [
@@ -188,14 +194,11 @@
             promptIndex = (promptIndex + 1) % prompts.length;
             promptEl.textContent = prompts[promptIndex];
 
-            // Grow Yes button infinitely
-            scale += 0.2;
-            yesBtn.style.transform = `scale(${scale})`;
-
-            // Switch to vertical layout if Yes is too big to prevent collision
-            if (scale >= 2) {
-                buttonsContainer.classList.add('vertical');
-            }
+            // Grow Yes button infinitely by increasing width and height
+            width += 20;
+            height += 10;
+            yesBtn.style.width = `${width}px`;
+            yesBtn.style.height = `${height}px`;
 
             // Show corresponding GIF
             teddyGif.src = gifs[promptIndex];
@@ -204,10 +207,11 @@
 
         yesBtn.addEventListener('click', () => {
             // Show happy GIF on Yes
-            teddyGif.src = "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z9z/giphy.gif"; // Happy teddy (replace with a better happy one if needed)
+            teddyGif.src = "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z9z/giphy.gif"; // Happy teddy
             teddyGif.classList.remove('hidden');
             // Hide buttons and update text
-            buttonsContainer.style.display = 'none';
+            yesBtn.style.display = 'none';
+            noBtn.style.display = 'none';
             promptEl.textContent = "Yay! You're my Valentine! 🎉";
         });
     </script>
