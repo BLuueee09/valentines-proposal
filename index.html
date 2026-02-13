@@ -18,7 +18,7 @@
             color: #d63384;
             overflow: hidden;
             position: relative;
-            padding: 20px; /* Added padding for mobile edges */
+            padding: 20px;
         }
         body::before {
             content: '';
@@ -43,6 +43,7 @@
             text-align: center;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
             animation: pulse 2s infinite;
+            transition: all 0.5s ease;
         }
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
@@ -52,8 +53,14 @@
             display: flex;
             gap: 30px;
             margin-bottom: 30px;
-            flex-wrap: wrap; /* Allows buttons to stack on very small screens */
+            flex-direction: row; /* Default horizontal */
+            flex-wrap: wrap;
             justify-content: center;
+            transition: all 0.5s ease;
+        }
+        .buttons.vertical {
+            flex-direction: column; /* Switch to vertical when Yes is too big */
+            gap: 20px;
         }
         button {
             padding: 20px 40px;
@@ -64,15 +71,15 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            min-width: 120px; /* Ensures touch-friendly size */
-            min-height: 60px; /* Touch target size */
-            flex-shrink: 0; /* Prevents shrinking */
+            min-width: 120px;
+            min-height: 60px;
+            flex-shrink: 0;
         }
         #yes-btn {
             background: linear-gradient(45deg, #ff69b4, #ffb3ba);
             color: white;
             transform: scale(1);
-            transform-origin: center; /* Ensures scaling from center */
+            transform-origin: center;
         }
         #no-btn {
             background: linear-gradient(45deg, #ffb3ba, #ffe6f2);
@@ -83,7 +90,7 @@
             box-shadow: 0 6px 12px rgba(0,0,0,0.3);
         }
         .gif-container {
-            width: min(350px, 90vw); /* Responsive width, max 90% of screen */
+            width: min(350px, 90vw);
             height: min(350px, 90vw);
             display: flex;
             align-items: center;
@@ -104,7 +111,7 @@
         /* Mobile-specific adjustments */
         @media (max-width: 768px) {
             h1 {
-                font-size: 2.5em; /* Smaller title on phones */
+                font-size: 2.5em;
             }
             button {
                 font-size: 1.2em;
@@ -130,39 +137,78 @@
     </style>
 </head>
 <body>
-    <h1>Will you be my Valentine's? 💕</h1>
-    <div class="buttons">
+    <h1 id="prompt">Will you be my Valentine's? 💕</h1>
+    <div class="buttons" id="buttons-container">
         <button id="yes-btn">Yes! 😍</button>
         <button id="no-btn">No 😢</button>
     </div>
     <div class="gif-container">
-        <img id="teddy-gif" src="https://media.giphy.com/media/3o7TKz9bX9v9Kz9z9z/giphy.gif" alt="Cute Teddy Bear" class="hidden">
+        <img id="teddy-gif" src="" alt="Cute Teddy Bear" class="hidden">
     </div>
 
     <script>
         const yesBtn = document.getElementById('yes-btn');
         const noBtn = document.getElementById('no-btn');
         const teddyGif = document.getElementById('teddy-gif');
+        const promptEl = document.getElementById('prompt');
+        const buttonsContainer = document.getElementById('buttons-container');
         let scale = 1;
-        const maxScale = 3; // Cap the scale to prevent overwhelming the layout
+        let promptIndex = 0;
+
+        // Array of prompts for "No" clicks
+        const prompts = [
+            "Will you be my Valentine's? 💕",
+            "Are you sure? 😢",
+            "Pretty please? 🥺",
+            "Please please please... 🙏",
+            "Don't break my heart! 💔",
+            "I'll be the best Valentine ever! 🌹",
+            "One more chance? 😊",
+            "Okay, last try... I promise! 🤞",
+            "Think about all the fun we'll have! 🎉",
+            "Please say yes... I can't take no for an answer! 😘"
+        ];
+
+        // Array of GIFs corresponding to each prompt (from Giphy - cute teddy bear themes)
+        const gifs = [
+            "", // Initial: no GIF
+            "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z9z/giphy.gif", // Pleading
+            "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif", // Sad teddy
+            "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z9z/giphy.gif", // Begging
+            "https://media.giphy.com/media/26AHONQ79FdWZhAI0/giphy.gif", // Heartbroken
+            "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z9z/giphy.gif", // Hopeful
+            "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif", // Pleading again
+            "https://media.giphy.com/media/26AHONQ79FdWZhAI0/giphy.gif", // Determined
+            "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z9z/giphy.gif", // Excited
+            "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif"  // Loving
+        ];
 
         noBtn.addEventListener('click', () => {
-            if (scale < maxScale) {
-                scale += 0.2;
-            }
+            // Cycle through prompts
+            promptIndex = (promptIndex + 1) % prompts.length;
+            promptEl.textContent = prompts[promptIndex];
+
+            // Grow Yes button infinitely
+            scale += 0.2;
             yesBtn.style.transform = `scale(${scale})`;
-            // Show a pleading teddy GIF on No
-            teddyGif.src = "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z9z/giphy.gif"; // Replace with a pleading teddy GIF
+
+            // Switch to vertical layout if Yes is too big to prevent collision
+            if (scale >= 2) {
+                buttonsContainer.classList.add('vertical');
+            }
+
+            // Show corresponding GIF
+            teddyGif.src = gifs[promptIndex];
             teddyGif.classList.remove('hidden');
         });
 
         yesBtn.addEventListener('click', () => {
-            // Show a happy teddy GIF on Yes
-            teddyGif.src = "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z9z/giphy.gif"; // Replace with a happy teddy GIF
+            // Show happy GIF on Yes
+            teddyGif.src = "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z9z/giphy.gif"; // Happy teddy (replace with a better happy one if needed)
             teddyGif.classList.remove('hidden');
             // Hide buttons and update text
-            document.querySelector('.buttons').style.display = 'none';
-            document.querySelector('h1').textContent = "Yay! You're my Valentine! 🎉";
+            buttonsContainer.style.display = 'none';
+            promptEl.textContent = "Yay! You're my Valentine! 🎉";
         });
     </script>
 </body>
