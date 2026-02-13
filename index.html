@@ -45,7 +45,7 @@
             gap: 20px;
             max-width: 90vw;
             text-align: center;
-            position: relative; /* For absolute positioning of No button */
+            position: relative;
         }
         #yes-btn {
             background: linear-gradient(45deg, #ff69b4, #ffb3ba);
@@ -102,8 +102,8 @@
             box-shadow: 0 6px 12px rgba(0,0,0,0.3);
         }
         #no-btn.random {
-            position: absolute; /* For random positioning */
-            z-index: 15; /* Above other elements */
+            position: absolute;
+            z-index: 15;
         }
         .gif-container {
             width: min(350px, 90vw);
@@ -176,9 +176,10 @@
         const teddyGif = document.getElementById('teddy-gif');
         const promptEl = document.getElementById('prompt');
         let promptIndex = 0;
-        let width = 120; // Initial width
-        let fontSize = 1.5; // Initial font size in em
+        let width = 120;
+        let fontSize = 1.5;
         let noClickCount = 0;
+        let dodgingActive = false;
 
         // Array of prompts for "No" clicks
         const prompts = [
@@ -196,61 +197,63 @@
 
         // Array of GIFs corresponding to each prompt (from Giphy - cute teddy bear themes)
         const gifs = [
-            "", // Initial: no GIF
-            "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z9z/giphy.gif", // Pleading
-            "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif", // Sad teddy
-            "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z/giphy.gif", // Begging
-            "https://media.giphy.com/media/26AHONQ79FdWZhAI0/giphy.gif", // Heartbroken
-            "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z/giphy.gif", // Hopeful
-            "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif", // Pleading again
-            "https://media.giphy.com/media/26AHONQ79FdWZhAI0/giphy.gif", // Determined
-            "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z/giphy.gif", // Excited
-            "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif"  // Loving
+            "",
+            "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z/giphy.gif",
+            "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif",
+            "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z/giphy.gif",
+            "https://media.giphy.com/media/26AHONQ79FdWZhAI0/giphy.gif",
+            "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z/giphy.gif",
+            "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif",
+            "https://media.giphy.com/media/26AHONQ79FdWZhAI0/giphy.gif",
+            "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z/giphy.gif",
+            "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif"
         ];
 
+        // Function to move button to a random position within viewport
+        function moveToRandomPosition() {
+            const buttonWidth = 120;
+            const buttonHeight = 60;
+            const maxX = Math.max(0, window.innerWidth - buttonWidth);
+            const maxY = Math.max(0, window.innerHeight - buttonHeight);
+            const randomX = Math.random() * maxX;
+            const randomY = Math.random() * maxY;
+            noBtn.style.left = `${randomX}px`;
+            noBtn.style.top = `${randomY}px`;
+        }
+
         noBtn.addEventListener('click', () => {
-            // Cycle through prompts
             promptIndex = (promptIndex + 1) % prompts.length;
             promptEl.textContent = prompts[promptIndex];
 
-            // Grow Yes button infinitely by increasing width
             width += 20;
             yesBtn.style.width = `${width}px`;
 
-            // Scale font size proportionally (e.g., increase by 0.1em per growth)
             fontSize += 0.1;
             yesBtn.style.fontSize = `${fontSize}em`;
 
-            // Increment click count and check for random position every 5 clicks
             noClickCount++;
-            if (noClickCount % 5 === 0 && window.innerWidth > 768) { // Only on larger screens
-                // Add random class and set random position
+            if (noClickCount % 5 === 0 && window.innerWidth > 768 && !dodgingActive) {
                 noBtn.classList.add('random');
-                const maxX = window.innerWidth - 150; // Avoid edge
-                const maxY = window.innerHeight - 100;
-                const randomX = Math.random() * maxX;
-                const randomY = Math.random() * maxY;
-                noBtn.style.left = `${randomX}px`;
-                noBtn.style.top = `${randomY}px`;
-
-                // Remove random position after 2 seconds
-                setTimeout(() => {
-                    noBtn.classList.remove('random');
-                    noBtn.style.left = '';
-                    noBtn.style.top = '';
-                }, 2000);
+                moveToRandomPosition();
             }
 
-            // Show corresponding GIF
+            // After 15 clicks, reset to original position and activate dodging
+            if (noClickCount === 15) {
+                noBtn.classList.remove('random');
+                noBtn.style.left = '';
+                noBtn.style.top = '';
+                dodgingActive = true;
+                // Add dodging on hover
+                noBtn.addEventListener('mouseenter', moveToRandomPosition);
+            }
+
             teddyGif.src = gifs[promptIndex];
             teddyGif.classList.remove('hidden');
         });
 
         yesBtn.addEventListener('click', () => {
-            // Show happy GIF on Yes
-            teddyGif.src = "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z9z/giphy.gif"; // Happy teddy
+            teddyGif.src = "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z/giphy.gif";
             teddyGif.classList.remove('hidden');
-            // Hide buttons and update text
             yesBtn.style.display = 'none';
             noBtn.style.display = 'none';
             promptEl.textContent = "Yay! You're my Valentine! 🎉";
