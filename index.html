@@ -243,7 +243,8 @@
                 noBtn.style.left = '';
                 noBtn.style.top = '';
                 dodgingActive = true;
-                // Add dodging on hover
+                // Add dodging on hover - make it fixed for viewport movement
+                noBtn.classList.add('random');
                 noBtn.addEventListener('mouseenter', moveToRandomPosition);
             }
 
