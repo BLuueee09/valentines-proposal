@@ -37,6 +37,12 @@
             100% { transform: translateY(-100vh); }
         }
         .content {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
             max-width: 90vw;
             text-align: center;
         }
@@ -53,9 +59,9 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             min-width: 120px;
             min-height: 60px;
-            float: left; /* Float left for wrapping */
-            margin-right: 20px;
-            margin-bottom: 20px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 10; /* Ensure it's clickable */
         }
         #yes-btn:hover, #yes-btn:active {
             transform: scale(1.1);
@@ -63,12 +69,12 @@
         }
         h1 {
             font-size: 3em;
-            margin-bottom: 30px;
-            text-align: center;
+            margin: 0;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
             animation: pulse 2s infinite;
             transition: all 0.5s ease;
-            clear: none; /* Allow wrapping around floated button */
+            flex: 1 1 auto; /* Allow it to wrap */
+            min-width: 200px; /* Prevent too narrow */
         }
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
@@ -87,8 +93,8 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             min-width: 120px;
             min-height: 60px;
-            clear: left; /* Clear float on No button to prevent overlap */
-            margin-bottom: 30px;
+            flex-shrink: 0;
+            position: relative;
         }
         #no-btn:hover, #no-btn:active {
             transform: scale(1.1);
@@ -104,7 +110,7 @@
             border-radius: 20px;
             overflow: hidden;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            clear: both; /* Clear floats for GIF */
+            flex-basis: 100%; /* Full width for GIF */
         }
         img {
             max-width: 100%;
@@ -123,6 +129,9 @@
                 font-size: 1.2em;
                 padding: 15px 30px;
             }
+            .content {
+                gap: 15px;
+            }
         }
         @media (max-width: 480px) {
             h1 {
@@ -131,13 +140,14 @@
             #yes-btn, #no-btn {
                 font-size: 1em;
                 padding: 12px 25px;
-                float: none; /* Disable float on mobile for stacking */
-                clear: none;
-                display: block;
-                margin: 10px auto;
             }
             .content {
-                text-align: left; /* Adjust for no float */
+                flex-direction: column; /* Stack on mobile for symmetry */
+                gap: 20px;
+            }
+            .gif-container {
+                width: min(300px, 90vw);
+                height: min(300px, 90vw);
             }
         }
     </style>
@@ -159,7 +169,6 @@
         const promptEl = document.getElementById('prompt');
         let promptIndex = 0;
         let width = 120; // Initial width
-        let height = 60; // Initial height
 
         // Array of prompts for "No" clicks
         const prompts = [
@@ -194,11 +203,9 @@
             promptIndex = (promptIndex + 1) % prompts.length;
             promptEl.textContent = prompts[promptIndex];
 
-            // Grow Yes button infinitely by increasing width and height
+            // Grow Yes button infinitely by increasing width
             width += 20;
-            height += 10;
             yesBtn.style.width = `${width}px`;
-            yesBtn.style.height = `${height}px`;
 
             // Show corresponding GIF
             teddyGif.src = gifs[promptIndex];
