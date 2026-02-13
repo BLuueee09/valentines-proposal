@@ -45,6 +45,7 @@
             gap: 20px;
             max-width: 90vw;
             text-align: center;
+            position: relative; /* For absolute positioning of No button */
         }
         #yes-btn {
             background: linear-gradient(45deg, #ff69b4, #ffb3ba);
@@ -61,7 +62,7 @@
             min-height: 60px;
             flex-shrink: 0;
             position: relative;
-            z-index: 10; /* Ensure it's clickable */
+            z-index: 10;
         }
         #yes-btn:hover, #yes-btn:active {
             transform: scale(1.1);
@@ -73,8 +74,8 @@
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
             animation: pulse 2s infinite;
             transition: all 0.5s ease;
-            flex: 1 1 auto; /* Allow it to wrap */
-            min-width: 200px; /* Prevent too narrow */
+            flex: 1 1 auto;
+            min-width: 200px;
         }
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
@@ -100,6 +101,10 @@
             transform: scale(1.1);
             box-shadow: 0 6px 12px rgba(0,0,0,0.3);
         }
+        #no-btn.random {
+            position: absolute; /* For random positioning */
+            z-index: 15; /* Above other elements */
+        }
         .gif-container {
             width: min(350px, 90vw);
             height: min(350px, 90vw);
@@ -110,7 +115,7 @@
             border-radius: 20px;
             overflow: hidden;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            flex-basis: 100%; /* Full width for GIF */
+            flex-basis: 100%;
         }
         img {
             max-width: 100%;
@@ -132,6 +137,9 @@
             .content {
                 gap: 15px;
             }
+            #no-btn.random {
+                position: relative; /* Disable random on mobile */
+            }
         }
         @media (max-width: 480px) {
             h1 {
@@ -142,7 +150,7 @@
                 padding: 12px 25px;
             }
             .content {
-                flex-direction: column; /* Stack on mobile for symmetry */
+                flex-direction: column;
                 gap: 20px;
             }
             .gif-container {
@@ -169,6 +177,8 @@
         const promptEl = document.getElementById('prompt');
         let promptIndex = 0;
         let width = 120; // Initial width
+        let fontSize = 1.5; // Initial font size in em
+        let noClickCount = 0;
 
         // Array of prompts for "No" clicks
         const prompts = [
@@ -189,12 +199,12 @@
             "", // Initial: no GIF
             "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z9z/giphy.gif", // Pleading
             "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif", // Sad teddy
-            "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z9z/giphy.gif", // Begging
+            "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z/giphy.gif", // Begging
             "https://media.giphy.com/media/26AHONQ79FdWZhAI0/giphy.gif", // Heartbroken
-            "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z9z/giphy.gif", // Hopeful
+            "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z/giphy.gif", // Hopeful
             "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif", // Pleading again
             "https://media.giphy.com/media/26AHONQ79FdWZhAI0/giphy.gif", // Determined
-            "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z9z/giphy.gif", // Excited
+            "https://media.giphy.com/media/3o7TKz9bX9v9Kz9z/giphy.gif", // Excited
             "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif"  // Loving
         ];
 
@@ -206,6 +216,30 @@
             // Grow Yes button infinitely by increasing width
             width += 20;
             yesBtn.style.width = `${width}px`;
+
+            // Scale font size proportionally (e.g., increase by 0.1em per growth)
+            fontSize += 0.1;
+            yesBtn.style.fontSize = `${fontSize}em`;
+
+            // Increment click count and check for random position every 5 clicks
+            noClickCount++;
+            if (noClickCount % 5 === 0 && window.innerWidth > 768) { // Only on larger screens
+                // Add random class and set random position
+                noBtn.classList.add('random');
+                const maxX = window.innerWidth - 150; // Avoid edge
+                const maxY = window.innerHeight - 100;
+                const randomX = Math.random() * maxX;
+                const randomY = Math.random() * maxY;
+                noBtn.style.left = `${randomX}px`;
+                noBtn.style.top = `${randomY}px`;
+
+                // Remove random position after 2 seconds
+                setTimeout(() => {
+                    noBtn.classList.remove('random');
+                    noBtn.style.left = '';
+                    noBtn.style.top = '';
+                }, 2000);
+            }
 
             // Show corresponding GIF
             teddyGif.src = gifs[promptIndex];
