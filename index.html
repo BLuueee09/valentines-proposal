@@ -102,7 +102,7 @@
             box-shadow: 0 6px 12px rgba(0,0,0,0.3);
         }
         #no-btn.random {
-            position: absolute;
+            position: fixed; /* Fixed to viewport to prevent scrolling */
             z-index: 15;
         }
         .gif-container {
@@ -138,7 +138,7 @@
                 gap: 15px;
             }
             #no-btn.random {
-                position: relative; /* Disable random on mobile */
+                position: relative; /* Disable fixed on mobile */
             }
         }
         @media (max-width: 480px) {
